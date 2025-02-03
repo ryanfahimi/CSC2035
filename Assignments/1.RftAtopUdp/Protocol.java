@@ -1,8 +1,3 @@
-/*
- * Replace the following string of 0s with your student number
- * 240653709
- */
-
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -66,21 +61,6 @@ public class Protocol {
     private int resentSegments; // the accumulated total number of data segments resent to the server as a
                                 // result of timeouts during a file transfer (for Part 3)
 
-    /**************************************************************************************************************************************
-     **************************************************************************************************************************************
-     * For this assignment, you have to implement the following methods:
-     * sendMetadata()
-     * readData()
-     * sendData()
-     * receiveAck()
-     * sendDataWithError()
-     * sendFileWithTimeout()
-     * sendFileWithGBN()
-     * Do not change any method signatures and do not change any other methods or
-     * code provided.
-     ***************************************************************************************************************************************
-     **************************************************************************************************************************************/
-
     /* PHASE 1 */
 
     /*
@@ -91,8 +71,6 @@ public class Protocol {
      * name - the name of the file to create on the server
      * maxSegSize - The size of the payload of the data segment
      * deal with error in sending
-     * output relevant information messages for the user to follow progress of the
-     * file transfer.
      * This method does not set any of the attributes of the protocol.
      */
     public void sendMetadata() {
@@ -167,8 +145,6 @@ public class Protocol {
      * This method:
      * computes a checksum of the data and sets the data segment's checksum prior to
      * sending.
-     * output relevant information messages for the user to follow progress of the
-     * file transfer.
      */
     public void sendData() throws IOException {
         try {
@@ -189,21 +165,12 @@ public class Protocol {
         }
     }
 
-    // Decide on the right place to :
-    // * update the remaining bytes so that it records the remaining bytes to be
-    // read from the file after this segment is transferred. When all file bytes
-    // have been read, the remaining bytes will be zero
-    // * update the number of total sent segments
-    // * update the number of sent bytes
-
     /*
      * This method receives the current Ack segment (ackSeg) from the server
      * This method:
      * needs to check whether the ack is as expected
      * exit of the client on detection of an error in the received Ack
      * return true if no error
-     * output relevant information messages for the user to follow progress of the
-     * file transfer.
      */
     public boolean receiveAck(int expectedDataSq) {
         // Create buffer for receiving ACK
@@ -216,9 +183,9 @@ public class Protocol {
 
             // Deserialize ACK segment
             Segment receivedAck;
-            try (ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(packet.getData());
-                    ObjectInputStream objectInputStream = new ObjectInputStream(byteArrayInputStream)) {
-                receivedAck = (Segment) objectInputStream.readObject();
+            try (ByteArrayInputStream in = new ByteArrayInputStream(packet.getData());
+                    ObjectInputStream is = new ObjectInputStream(in)) {
+                receivedAck = (Segment) is.readObject();
             }
 
             // Verify sequence number
@@ -312,14 +279,9 @@ public class Protocol {
      * same data segment.
      * updates attributes that record the progress of a file transfer. This includes
      * the number of consecutive retries for each segment.
-     *
-     * output relevant information messages for the user to follow progress of the
-     * file transfer.
-     * after completing the file transfer, display total segments transferred and
+     * after completing the file transfer, displays total segments transferred and
      * the total number of resent segments
      * 
-     * relevant methods that need to be used include: readData(),
-     * sendDataWithError(), receiveAck().
      */
     void sendFileWithTimeout() throws IOException {
         try {
@@ -454,11 +416,11 @@ public class Protocol {
      * @throws IOException
      */
     private DatagramPacket createPacket(Object obj) throws IOException {
-        try (ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-                ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream)) {
+        try (ByteArrayOutputStream on = new ByteArrayOutputStream();
+                ObjectOutputStream os = new ObjectOutputStream(on)) {
 
-            objectOutputStream.writeObject(obj);
-            byte[] data = byteArrayOutputStream.toByteArray();
+            os.writeObject(obj);
+            byte[] data = on.toByteArray();
 
             return new DatagramPacket(data, data.length, ipAddress, portNumber);
         }
@@ -481,14 +443,7 @@ public class Protocol {
                 dataSeg.getSq(), dataSeg.getSize(), dataSeg.getChecksum(), dataSeg.getPayLoad());
     }
 
-    /*************************************************************************************************************************************
-     **************************************************************************************************************************************
-     **************************************************************************************************************************************
-     * These methods are implemented for you .. Do NOT Change them
-     **************************************************************************************************************************************
-     **************************************************************************************************************************************
-     **************************************************************************************************************************************/
-    /*
+    /**
      * This method initialises ALL the 19 attributes needed to allow the Protocol
      * methods to work properly
      */
