@@ -290,8 +290,15 @@ public class Protocol {
             setSocketTimeout(timeout * 1000);
 
             while (remainingBytes != 0) {
+                // Reset retry counter for new segment
+                currRetry = 0;
+
                 readData();
-                handleSegmentTransmission();
+                do {
+                    sendDataWithError();
+
+                    currRetry++;
+                } while (!receiveAck(dataSeg.getSq()));
             }
 
             System.out.printf("Total Segments %d%n", totalSegments);
@@ -316,22 +323,6 @@ public class Protocol {
             closeSocket();
             System.exit(1);
         }
-    }
-
-    /**
-     * Transmits the current segment and handles retries.
-     * 
-     * @throws IOException
-     */
-    private void handleSegmentTransmission() throws IOException {
-        // Reset retry counter for new segment
-        currRetry = 0;
-
-        do {
-            sendDataWithError();
-
-            currRetry++;
-        } while (!receiveAck(dataSeg.getSq()));
     }
 
     /* PHASE 4 */
