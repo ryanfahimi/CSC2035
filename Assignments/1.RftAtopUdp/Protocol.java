@@ -334,7 +334,6 @@ public class Protocol {
     void sendFileNormalGBN(int window) throws IOException {
         int expectedSegments = (int) Math.ceil((double) fileSize / maxPayload);
         int seqNumCount = window + 1;
-        int baseSeqNum = 0;
         int nextSeqNum = 0;
         int acksReceived = 0;
 
@@ -351,11 +350,10 @@ public class Protocol {
         System.out.println("-----------------------------------------------------------");
 
         while (acksReceived < expectedSegments) {
-            printOutstandingAcks(seqNumCount, baseSeqNum, nextSeqNum);
+            printOutstandingAcks(seqNumCount, acksReceived, nextSeqNum);
 
-            if (receiveAck(baseSeqNum % seqNumCount)) {
+            if (receiveAck(acksReceived % seqNumCount)) {
                 acksReceived++;
-                baseSeqNum++;
 
                 if (nextSeqNum < expectedSegments) {
                     System.out.println("SENDER: slide the window and send the next segment");
